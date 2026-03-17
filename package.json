@@ -1,5 +1,6 @@
 {
-  "name": "react-example",
+  "name": "pythonmaster-ai",
+  "description": "An interactive AI-powered platform to master Python programming through hands-on challenges.",
   "private": true,
   "version": "0.0.0",
   "type": "module",
