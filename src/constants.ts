@@ -1,0 +1,186 @@
+import { PythonTopic } from './types';
+
+export const PYTHON_TOPICS: PythonTopic[] = [
+  /* Fundamentals Category - Sorted by Complexity */
+  { id: 'variables', name: 'Variables & Types', description: 'Master basic data types: strings, integers, floats, and booleans.', category: 'fundamentals' },
+  { id: 'conditionals', name: 'Conditionals', description: 'Control program flow with if, elif, and else statements.', category: 'fundamentals' },
+  { id: 'loops', name: 'Loops', description: 'Iterate over data using for and while loops.', category: 'fundamentals' },
+  { id: 'lists', name: 'Lists', description: 'Learn to manipulate ordered collections of items.', category: 'fundamentals' },
+  { id: 'dictionaries', name: 'Dictionaries', description: 'Work with key-value pairs for efficient data mapping.', category: 'fundamentals' },
+  { id: 'sets', name: 'Sets', description: 'Handle unordered collections of unique elements.', category: 'fundamentals' },
+  { id: 'functions', name: 'Functions', description: 'Write reusable blocks of code with def and return.', category: 'fundamentals' },
+  { id: 'modules', name: 'Modules & Packages', description: 'Import and use external code libraries.', category: 'fundamentals' },
+  { id: 'file-io', name: 'File I/O', description: 'Read from and write to files on your system.', category: 'fundamentals' },
+  { id: 'exceptions', name: 'Errors & Exceptions', description: 'Manage errors gracefully with try, except, and finally.', category: 'fundamentals' },
+  { id: 'debugging', name: 'Debugging', description: 'Learn to identify and fix bugs using pdb and logging techniques.', category: 'fundamentals' },
+  { id: 'lambda', name: 'Lambda Functions', description: 'Create small, anonymous functions on the fly.', category: 'fundamentals' },
+  { id: 'list-comprehensions', name: 'List Comprehensions', description: 'Create lists elegantly in a single line.', category: 'fundamentals' },
+  { id: 'functionals', name: 'Python Functionals', description: 'Apply functional programming patterns with map, filter, and reduce.', category: 'fundamentals' },
+  { id: 'classes', name: 'Classes & OOP', description: 'Understand Object-Oriented Programming in Python.', category: 'fundamentals' },
+  { id: 'decorators', name: 'Closures & Decorators', description: 'Enhance function behavior using closures and the @decorator syntax.', category: 'fundamentals' },
+
+  /* Modules Category - Sorted by Difficulty (Simple to Complex) */
+  { id: 'turtle', name: 'turtle', description: 'Turtle graphics.', category: 'modules' },
+  { id: 'math', name: 'math', description: 'Mathematical functions.', category: 'modules' },
+  { id: 'random', name: 'random', description: 'Generate pseudo-random numbers.', category: 'modules' },
+  { id: 'time', name: 'time', description: 'Time access and conversions.', category: 'modules' },
+  { id: 'pprint', name: 'pprint', description: 'Data pretty printer.', category: 'modules' },
+  { id: 'calendar', name: 'calendar', description: 'General calendar-related functions.', category: 'modules' },
+  { id: 'statistics', name: 'statistics', description: 'Mathematical statistics functions.', category: 'modules' },
+  { id: 'colorsys', name: 'colorsys', description: 'Conversions between color systems.', category: 'modules' },
+  { id: 'datetime', name: 'datetime', description: 'Basic date and time types.', category: 'modules' },
+  { id: 'pathlib', name: 'pathlib', description: 'Object-oriented filesystem paths.', category: 'modules' },
+  { id: 'os', name: 'os', description: 'Miscellaneous operating system interfaces.', category: 'modules' },
+  { id: 'sys', name: 'sys', description: 'System-specific parameters and functions.', category: 'modules' },
+  { id: 'json', name: 'json', description: 'JSON encoder and decoder.', category: 'modules' },
+  { id: 'csv', name: 'csv', description: 'CSV File Reading and Writing.', category: 'modules' },
+  { id: 'shutil', name: 'shutil', description: 'High-level file operations.', category: 'modules' },
+  { id: 'glob', name: 'glob', description: 'Unix style pathname pattern expansion.', category: 'modules' },
+  { id: 'copy', name: 'copy', description: 'Shallow and deep copy operations.', category: 'modules' },
+  { id: 'zipfile', name: 'zipfile', description: 'Work with ZIP archives.', category: 'modules' },
+  { id: 'tarfile', name: 'tarfile', description: 'Read and write tar archive files.', category: 'modules' },
+  { id: 'configparser', name: 'configparser', description: 'Configuration file parser.', category: 'modules' },
+  { id: 'argparse', name: 'argparse', description: 'Parser for command-line options, arguments and sub-commands.', category: 'modules' },
+  { id: 'logging', name: 'logging', description: 'Logging facility for Python.', category: 'modules' },
+  { id: 'unittest', name: 'unittest', description: 'Unit testing framework.', category: 'modules' },
+  { id: 'getpass', name: 'getpass', description: 'Portable password input.', category: 'modules' },
+  { id: 'sqlite3', name: 'sqlite3', description: 'DB-API 2.0 interface for SQLite databases.', category: 'modules' },
+  { id: 'regex', name: 're (Regex)', description: 'Regular expression operations for string searching and manipulation.', category: 'modules' },
+  { id: 'collections-module', name: 'collections', description: 'High-performance container datatypes.', category: 'modules' },
+  { id: 'itertools', name: 'itertools', description: 'Functions creating iterators for efficient looping.', category: 'modules' },
+  { id: 'tempfile', name: 'tempfile', description: 'Generate temporary files and directories.', category: 'modules' },
+  { id: 'pickle', name: 'pickle', description: 'Python object serialization.', category: 'modules' },
+  { id: 'base64', name: 'base64', description: 'Base16, Base32, Base64, Base85 data encodings.', category: 'modules' },
+  { id: 'hashlib', name: 'hashlib', description: 'Secure hashes and message digests.', category: 'modules' },
+  { id: 'urllib', name: 'urllib', description: 'URL handling modules.', category: 'modules' },
+  { id: 'http', name: 'http', description: 'HTTP modules.', category: 'modules' },
+  { id: 'pydoc', name: 'pydoc', description: 'Documentation generator and online help system.', category: 'modules' },
+  { id: 'cmd', name: 'cmd', description: 'Support for line-oriented command interpreters.', category: 'modules' },
+  { id: 'shlex', name: 'shlex', description: 'Simple lexical analysis.', category: 'modules' },
+  { id: 'tkinter', name: 'tkinter', description: 'Python interface to Tcl/Tk.', category: 'modules' },
+  { id: 'zlib', name: 'zlib', description: 'Compression compatible with gzip.', category: 'modules' },
+  { id: 'gzip', name: 'gzip', description: 'Support for gzip files.', category: 'modules' },
+  { id: 'xml', name: 'xml.etree.ElementTree', description: 'The ElementTree XML API.', category: 'modules' },
+  { id: 'html-parsing', name: 'html.parser', description: 'Simple HTML and XHTML parser.', category: 'modules' },
+  { id: 'numpy', name: 'numpy', description: 'Fundamental package for scientific computing with Python (External but essential).', category: 'modules' },
+  { id: 'typing', name: 'typing', description: 'Support for type hints.', category: 'modules' },
+  { id: 'enum', name: 'enum', description: 'Support for enumerations.', category: 'modules' },
+  { id: 'abc', name: 'abc', description: 'Abstract Base Classes.', category: 'modules' },
+  { id: 'inspect', name: 'inspect', description: 'Inspect live objects.', category: 'modules' },
+  { id: 'traceback', name: 'traceback', description: 'Print or retrieve a stack traceback.', category: 'modules' },
+  { id: 'hmac', name: 'hmac', description: 'Keyed-Hashing for Message Authentication.', category: 'modules' },
+  { id: 'secrets', name: 'secrets', description: 'Generate secure random numbers for managing secrets.', category: 'modules' },
+  { id: 'email', name: 'email', description: 'An email and MIME handling package.', category: 'modules' },
+  { id: 'subprocess', name: 'subprocess', description: 'Subprocess management.', category: 'modules' },
+  { id: 'threading', name: 'threading', description: 'Thread-based parallelism.', category: 'modules' },
+  { id: 'multiprocessing', name: 'multiprocessing', description: 'Process-based parallelism.', category: 'modules' },
+  { id: 'asyncio', name: 'asyncio', description: 'Asynchronous I/O.', category: 'modules' },
+  { id: 'socket', name: 'socket', description: 'Low-level networking interface.', category: 'modules' },
+
+  /* Built-in Functions Category - Grouped by Purpose & Sorted by Frequency */
+  // Output & Input
+  { id: 'print', name: 'print()', description: 'Print objects to the text stream file.', category: 'built-ins' },
+  { id: 'input', name: 'input()', description: 'Read a line from input and convert it to a string.', category: 'built-ins' },
+
+  // Type Conversion & Creation
+  { id: 'str', name: 'str()', description: 'Return a string version of an object.', category: 'built-ins' },
+  { id: 'int', name: 'int()', description: 'Return an integer object constructed from a number or string.', category: 'built-ins' },
+  { id: 'float', name: 'float()', description: 'Return a floating point number.', category: 'built-ins' },
+  { id: 'bool', name: 'bool()', description: 'Convert a value to a Boolean.', category: 'built-ins' },
+  { id: 'list', name: 'list()', description: 'Create a mutable sequence type.', category: 'built-ins' },
+  { id: 'dict', name: 'dict()', description: 'Create a new dictionary.', category: 'built-ins' },
+  { id: 'set', name: 'set()', description: 'Return a new set object.', category: 'built-ins' },
+  { id: 'tuple', name: 'tuple()', description: 'Create an immutable sequence type.', category: 'built-ins' },
+  { id: 'complex', name: 'complex()', description: 'Return a complex number.', category: 'built-ins' },
+  { id: 'bytes', name: 'bytes()', description: 'Return a new bytes object.', category: 'built-ins' },
+  { id: 'bytearray', name: 'bytearray()', description: 'Return a new array of bytes.', category: 'built-ins' },
+  { id: 'frozenset', name: 'frozenset()', description: 'Return a new frozenset object.', category: 'built-ins' },
+  { id: 'object', name: 'object()', description: 'Return a new featureless object.', category: 'built-ins' },
+
+  // Sequence & Collection Utilities
+  { id: 'len', name: 'len()', description: 'Return the length (the number of items) of an object.', category: 'built-ins' },
+  { id: 'range', name: 'range()', description: 'Create an immutable sequence of numbers.', category: 'built-ins' },
+  { id: 'enumerate', name: 'enumerate()', description: 'Return an enumerate object (index and value).', category: 'built-ins' },
+  { id: 'zip', name: 'zip()', description: 'Iterate over several iterables in parallel.', category: 'built-ins' },
+  { id: 'sorted', name: 'sorted()', description: 'Return a new sorted list from an iterable.', category: 'built-ins' },
+  { id: 'reversed', name: 'reversed()', description: 'Return a reverse iterator.', category: 'built-ins' },
+  { id: 'min', name: 'min()', description: 'Return the smallest item.', category: 'built-ins' },
+  { id: 'max', name: 'max()', description: 'Return the largest item.', category: 'built-ins' },
+  { id: 'sum', name: 'sum()', description: 'Sum the items of an iterable.', category: 'built-ins' },
+  { id: 'all', name: 'all()', description: 'Return True if all elements are true.', category: 'built-ins' },
+  { id: 'any', name: 'any()', description: 'Return True if any element is true.', category: 'built-ins' },
+  { id: 'slice', name: 'slice()', description: 'Return a slice object.', category: 'built-ins' },
+
+  // Object Inspection & Attributes
+  { id: 'type', name: 'type()', description: 'Return the type of an object.', category: 'built-ins' },
+  { id: 'isinstance', name: 'isinstance()', description: 'Check if an object is an instance of a class.', category: 'built-ins' },
+  { id: 'issubclass', name: 'issubclass()', description: 'Check if a class is a subclass of another.', category: 'built-ins' },
+  { id: 'hasattr', name: 'hasattr()', description: 'Check if an object has a named attribute.', category: 'built-ins' },
+  { id: 'getattr', name: 'getattr()', description: 'Return the value of a named attribute.', category: 'built-ins' },
+  { id: 'setattr', name: 'setattr()', description: 'Set the value of a named attribute.', category: 'built-ins' },
+  { id: 'delattr', name: 'delattr()', description: 'Delete a named attribute.', category: 'built-ins' },
+  { id: 'dir', name: 'dir()', description: 'Return a list of names in the current scope.', category: 'built-ins' },
+  { id: 'id', name: 'id()', description: 'Return the identity of an object.', category: 'built-ins' },
+  { id: 'hash', name: 'hash()', description: 'Return the hash value of an object.', category: 'built-ins' },
+  { id: 'callable', name: 'callable()', description: 'Check if an object appears callable.', category: 'built-ins' },
+  { id: 'vars', name: 'vars()', description: 'Return the __dict__ attribute of an object.', category: 'built-ins' },
+  { id: 'help', name: 'help()', description: 'Invoke the built-in help system.', category: 'built-ins' },
+
+  // Math
+  { id: 'abs', name: 'abs()', description: 'Return the absolute value of a number.', category: 'built-ins' },
+  { id: 'round', name: 'round()', description: 'Round a number to a specified precision.', category: 'built-ins' },
+  { id: 'pow', name: 'pow()', description: 'Return base to the power exp.', category: 'built-ins' },
+  { id: 'divmod', name: 'divmod()', description: 'Return quotient and remainder.', category: 'built-ins' },
+
+  // Functional Programming
+  { id: 'map', name: 'map()', description: 'Apply a function to every item of an iterable.', category: 'built-ins' },
+  { id: 'filter', name: 'filter()', description: 'Construct an iterator from elements that satisfy a condition.', category: 'built-ins' },
+
+  // Iteration
+  { id: 'iter', name: 'iter()', description: 'Return an iterator object.', category: 'built-ins' },
+  { id: 'next', name: 'next()', description: 'Retrieve the next item from an iterator.', category: 'built-ins' },
+  { id: 'aiter', name: 'aiter()', description: 'Return an asynchronous iterator.', category: 'built-ins' },
+  { id: 'anext', name: 'anext()', description: 'Return the next item from an asynchronous iterator.', category: 'built-ins' },
+
+  // String & Character Representation
+  { id: 'repr', name: 'repr()', description: 'Return a printable representation of an object.', category: 'built-ins' },
+  { id: 'ascii', name: 'ascii()', description: 'Return a printable representation of an object.', category: 'built-ins' },
+  { id: 'format', name: 'format()', description: 'Convert a value to a formatted representation.', category: 'built-ins' },
+  { id: 'chr', name: 'chr()', description: 'Return string representing a character from its code point.', category: 'built-ins' },
+  { id: 'ord', name: 'ord()', description: 'Return the Unicode code point of a character.', category: 'built-ins' },
+  { id: 'bin', name: 'bin()', description: 'Convert an integer to a binary string.', category: 'built-ins' },
+  { id: 'hex', name: 'hex()', description: 'Convert an integer to a hexadecimal string.', category: 'built-ins' },
+  { id: 'oct', name: 'oct()', description: 'Convert an integer to an octal string.', category: 'built-ins' },
+
+  // Classes & Methods
+  { id: 'super', name: 'super()', description: 'Delegate method calls to a parent class.', category: 'built-ins' },
+  { id: 'classmethod', name: 'classmethod()', description: 'Transform a method into a class method.', category: 'built-ins' },
+  { id: 'staticmethod', name: 'staticmethod()', description: 'Transform a method into a static method.', category: 'built-ins' },
+  { id: 'property', name: 'property()', description: 'Return a property attribute.', category: 'built-ins' },
+
+  // System & Dynamic Execution
+  { id: 'open', name: 'open()', description: 'Open a file and return a file object.', category: 'built-ins' },
+  { id: 'breakpoint', name: 'breakpoint()', description: 'Drop into the debugger.', category: 'built-ins' },
+  { id: 'eval', name: 'eval()', description: 'Evaluate a string as a Python expression.', category: 'built-ins' },
+  { id: 'exec', name: 'exec()', description: 'Support dynamic execution of Python code.', category: 'built-ins' },
+  { id: 'compile', name: 'compile()', description: 'Compile source into a code or AST object.', category: 'built-ins' },
+  { id: 'globals', name: 'globals()', description: 'Return a dictionary of the current global symbol table.', category: 'built-ins' },
+  { id: 'locals', name: 'locals()', description: 'Return a dictionary of the current local symbol table.', category: 'built-ins' },
+
+  // Memory
+  { id: 'memoryview', name: 'memoryview()', description: 'Return a memory view object.', category: 'built-ins' },
+];
+
+export const TOPIC_CATEGORIES = [
+  { id: 'fundamentals', name: 'Fundamentals', icon: 'Cpu' },
+  { id: 'built-ins', name: 'Built-in Functions', icon: 'Terminal' },
+  { id: 'modules', name: 'Modules', icon: 'Package' },
+];
+
+export const APP_THEME = {
+  bg: 'bg-[#0a0a0f]',
+  text: 'text-slate-200',
+  accent: 'text-blue-400',
+  border: 'border-blue-900/30',
+  fontMono: 'font-mono',
+};

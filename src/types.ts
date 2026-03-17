@@ -1,0 +1,39 @@
+export type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+
+export type AppState = 'DASHBOARD' | 'LOADING_CHALLENGE' | 'PRACTICE' | 'GRADING' | 'FEEDBACK';
+
+export interface PythonTopic {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+}
+
+export interface Challenge {
+  topicId: string;
+  difficulty: Difficulty;
+  description: string;
+  context: string;
+  expectedCommandHint: string;
+}
+
+export interface GradingResult {
+  correct: boolean;
+  feedback: string;
+  solution: string;
+}
+
+export interface HistoryItem {
+  challenge: Challenge;
+  result: GradingResult;
+  submission: string;
+}
+
+export interface SessionState {
+  selectedTopic: string | null;
+  currentChallenge: Challenge | null;
+  lastResult: GradingResult | null;
+  history: HistoryItem[];
+  recentChallengesByKey: Record<string, { description: string; context: string }[]>;
+  seenChallengeFingerprintsByKey: Record<string, string[]>;
+}
