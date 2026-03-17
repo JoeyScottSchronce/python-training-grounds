@@ -271,7 +271,7 @@ export default function App() {
                       <Braces className="w-5 h-5 text-blue-400" />
                       Python Training Grounds
                     </h2>
-                    <p className="text-slate-400 text-md">Master Python through AI-generated coding challenges.</p>
+                    <p className="text-slate-400 text-md">Master Python one challenge at a time.</p>
                   </div>
                   
                   <div className="flex flex-col sm:flex-row gap-4">
