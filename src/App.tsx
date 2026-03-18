@@ -42,6 +42,7 @@ export default function App() {
     history: [],
     recentChallengesByKey: {},
     seenChallengeFingerprintsByKey: {},
+    trainerMode: false,
   });
   const [userInput, setUserInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,6 +78,12 @@ export default function App() {
     }
   }, [appState]);
 
+  const pickRandomTopicId = () => {
+    if (PYTHON_TOPICS.length === 0) return null;
+    const index = Math.floor(Math.random() * PYTHON_TOPICS.length);
+    return PYTHON_TOPICS[index].id;
+  };
+
   const generateNonRepeatingChallenge = async (topicId: string) => {
     const key = makeTopicDifficultyKey(topicId, selectedDifficulty);
     const avoidExactChallenges = (session.recentChallengesByKey[key] ?? []).slice(-MAX_RECENT_CHALLENGES_TO_AVOID);
@@ -93,6 +100,56 @@ export default function App() {
     return lastChallenge ?? generateChallenge(topicId, selectedDifficulty, { avoidExactChallenges });
   };
 
+  const startTrainerChoiceSession = async () => {
+    const topicId = pickRandomTopicId();
+    if (!topicId) {
+      throw new Error("No topics available for Trainer's Choice.");
+    }
+
+    const challenge = await generateNonRepeatingChallenge(topicId);
+    setSession(prev => ({
+      ...prev,
+      trainerMode: true,
+      selectedTopic: topicId,
+      currentChallenge: challenge,
+      lastResult: null,
+      recentChallengesByKey: (() => {
+        const key = makeTopicDifficultyKey(topicId, selectedDifficulty);
+        const existing = prev.recentChallengesByKey[key] ?? [];
+        const next = [...existing, { description: challenge.description, context: challenge.context }];
+        return { ...prev.recentChallengesByKey, [key]: next.slice(-MAX_RECENT_CHALLENGES_TO_AVOID) };
+      })(),
+      seenChallengeFingerprintsByKey: (() => {
+        const key = makeTopicDifficultyKey(topicId, selectedDifficulty);
+        const fp = fingerprintChallenge(challenge);
+        const existing = prev.seenChallengeFingerprintsByKey[key] ?? [];
+        return {
+          ...prev.seenChallengeFingerprintsByKey,
+          [key]: existing.includes(fp) ? existing : [...existing, fp],
+        };
+      })(),
+    }));
+  };
+
+  const handleTrainersChoice = async () => {
+    setIsLoading(true);
+    setAppState('LOADING_CHALLENGE');
+    setError(null);
+    setSelectedCategory(null);
+    setSearchQuery('');
+    try {
+      await startTrainerChoiceSession();
+      setAppState('PRACTICE');
+      setUserInput('');
+    } catch (err) {
+      setError("Trainer's Choice is currently unavailable. Please try again.");
+      setAppState('DASHBOARD');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSelectTopic = async (topicId: string) => {
     setIsLoading(true);
     setAppState('LOADING_CHALLENGE');
@@ -101,6 +158,7 @@ export default function App() {
       const challenge = await generateNonRepeatingChallenge(topicId);
       setSession(prev => ({
         ...prev,
+        trainerMode: false,
         selectedTopic: topicId,
         currentChallenge: challenge,
         lastResult: null,
@@ -209,23 +267,29 @@ export default function App() {
   }, [isRunFeedbackOpen]);
 
   const handleNextChallenge = async () => {
-    if (!session.selectedTopic) return;
+    const baseTopicId =
+      session.trainerMode ? pickRandomTopicId() : session.selectedTopic;
+    if (!baseTopicId) return;
+
     setIsLoading(true);
     setAppState('LOADING_CHALLENGE');
     try {
-      const challenge = await generateNonRepeatingChallenge(session.selectedTopic);
+      const challenge = await generateNonRepeatingChallenge(baseTopicId);
       setSession(prev => ({
         ...prev,
+        trainerMode: prev.trainerMode,
         currentChallenge: challenge,
         lastResult: null,
         recentChallengesByKey: (() => {
-          const key = makeTopicDifficultyKey(prev.selectedTopic || session.selectedTopic!, selectedDifficulty);
+          const topicKey = prev.trainerMode ? baseTopicId : (prev.selectedTopic || baseTopicId);
+          const key = makeTopicDifficultyKey(topicKey, selectedDifficulty);
           const existing = prev.recentChallengesByKey[key] ?? [];
           const next = [...existing, { description: challenge.description, context: challenge.context }];
           return { ...prev.recentChallengesByKey, [key]: next.slice(-MAX_RECENT_CHALLENGES_TO_AVOID) };
         })(),
         seenChallengeFingerprintsByKey: (() => {
-          const key = makeTopicDifficultyKey(prev.selectedTopic || session.selectedTopic!, selectedDifficulty);
+          const topicKey = prev.trainerMode ? baseTopicId : (prev.selectedTopic || baseTopicId);
+          const key = makeTopicDifficultyKey(topicKey, selectedDifficulty);
           const fp = fingerprintChallenge(challenge);
           const existing = prev.seenChallengeFingerprintsByKey[key] ?? [];
           return {
@@ -253,6 +317,7 @@ export default function App() {
       history: [],
       recentChallengesByKey: {},
       seenChallengeFingerprintsByKey: {},
+      trainerMode: false,
     });
     setUserInput('');
     setError(null);
@@ -356,6 +421,17 @@ export default function App() {
                       {cat.name}
                     </button>
                   ))}
+                  <button
+                    onClick={handleTrainersChoice}
+                    className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-widest border transition-all ${
+                      session.trainerMode
+                        ? 'bg-amber-400 text-black border-amber-400'
+                        : 'border-blue-900/30 text-amber-300/80 hover:border-amber-400/70 hover:text-amber-200'
+                    }`}
+                  >
+                    <Cpu className="w-4 h-4" />
+                    Trainer's Choice
+                  </button>
                 </div>
               </div>
 
@@ -468,7 +544,13 @@ export default function App() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2 text-xs text-blue-500/50 uppercase tracking-widest">
                     <Info className="w-4 h-4" />
-                    Topic: {session.selectedTopic}
+                    <span>
+                      Topic: {session.trainerMode ? (
+                        <span className="text-amber-300/80">Trainer's Choice</span>
+                      ) : (
+                        session.selectedTopic
+                      )}
+                    </span>
                   </div>
                   <div className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest border ${
                     session.currentChallenge.difficulty === 'BEGINNER' ? 'border-blue-500/50 text-blue-400' :

@@ -46,4 +46,5 @@ export interface SessionState {
   history: HistoryItem[];
   recentChallengesByKey: Record<string, { description: string; context: string }[]>;
   seenChallengeFingerprintsByKey: Record<string, string[]>;
+  trainerMode: boolean;
 }
