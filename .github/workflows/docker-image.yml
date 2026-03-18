@@ -40,6 +40,9 @@ jobs:
       run: npm run build
       env:
         VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+        # Used by `vite.config.ts` to set correct `base` for repo GitHub Pages.
+        # Without this, built asset URLs default to `/assets/...` and break on `/<repo>/`.
+        GITHUB_PAGES: "true"
 
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag python-training-grounds:$(date +%s)
