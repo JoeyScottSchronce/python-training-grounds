@@ -26,8 +26,8 @@ import {
   Layers
 } from 'lucide-react';
 import { PYTHON_TOPICS, TOPIC_CATEGORIES, APP_THEME } from './constants';
-import { AppState, Challenge, GradingResult, SessionState, Difficulty } from './types';
-import { generateChallenge, gradeSubmission } from './services/aiService';
+import { AppState, Challenge, GradingResult, SessionState, Difficulty, ProgressEvaluationResult } from './types';
+import { evaluateProgress, generateChallenge, gradeSubmission } from './services/aiService';
 import { makeTopicDifficultyKey, fingerprintChallenge } from './utils/challengeFingerprint';
 
 const MAX_GENERATION_RETRIES = 3;
@@ -48,9 +48,13 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('BEGINNER');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRunLoading, setIsRunLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [runFeedback, setRunFeedback] = useState<ProgressEvaluationResult | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [isRunFeedbackOpen, setIsRunFeedbackOpen] = useState(false);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -148,7 +152,7 @@ export default function App() {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!userInput.trim() || !session.currentChallenge || isLoading) return;
+    if (!userInput.trim() || !session.currentChallenge || isLoading || isRunLoading) return;
 
     setIsLoading(true);
     setAppState('GRADING');
@@ -172,6 +176,37 @@ export default function App() {
       setIsLoading(false);
     }
   };
+
+  const closeRunPopup = () => {
+    setIsRunFeedbackOpen(false);
+  };
+
+  const handleRun = async () => {
+    if (!userInput.trim() || !session.currentChallenge || isLoading || isRunLoading) return;
+
+    setIsRunLoading(true);
+    setRunError(null);
+    try {
+      const result = await evaluateProgress(session.currentChallenge, userInput);
+      setRunFeedback(result);
+      setIsRunFeedbackOpen(true);
+    } catch (err) {
+      setRunError("Run failed. Please try again.");
+      setIsRunFeedbackOpen(true);
+      console.error(err);
+    } finally {
+      setIsRunLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isRunFeedbackOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeRunPopup();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isRunFeedbackOpen]);
 
   const handleNextChallenge = async () => {
     if (!session.selectedTopic) return;
@@ -492,14 +527,27 @@ export default function App() {
                     )}
                   </div>
                   
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-4 flex justify-end gap-2">
+                    <button
+                      onClick={handleRun}
+                      disabled={!userInput.trim() || appState === 'GRADING' || isLoading || isRunLoading}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-blue-900/20 border border-blue-900/40 text-blue-200 font-bold hover:bg-blue-900/30 hover:border-blue-500/40 disabled:opacity-50 transition-colors uppercase text-xs tracking-widest"
+                      title="Run progress check (hints only)"
+                    >
+                      {isRunLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Info className="w-3.5 h-3.5" />
+                      )}
+                      Run
+                    </button>
                     <button
                       onClick={() => handleSubmit()}
-                      disabled={!userInput.trim() || appState === 'GRADING'}
+                      disabled={!userInput.trim() || appState === 'GRADING' || isRunLoading}
                       className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-black font-bold hover:bg-blue-400 disabled:opacity-50 disabled:hover:bg-blue-500 transition-colors uppercase text-sm tracking-tighter"
                     >
                       <Play className="w-4 h-4 fill-current" />
-                      Run & Grade
+                      Submit
                     </button>
                   </div>
                 </div>
@@ -577,6 +625,94 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Run Feedback Popup */}
+      <AnimatePresence>
+        {isRunFeedbackOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            onClick={closeRunPopup}
+          >
+            <motion.div
+              initial={{ scale: 0.96, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.96, opacity: 0 }}
+              className="w-full max-w-xl bg-[#0a0a10] border border-blue-900/50 p-6 md:p-8 relative"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Run feedback"
+            >
+              <button
+                onClick={closeRunPopup}
+                className="absolute top-4 right-4 text-blue-500/50 hover:text-blue-400 transition-colors"
+                aria-label="Close run feedback"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-3 uppercase tracking-tighter text-white">
+                <Info className="w-5 h-5 text-blue-400" />
+                Progress Check
+              </h3>
+
+              {runError ? (
+                <div className="p-4 border border-red-500/30 bg-red-500/5 text-red-400 text-sm flex items-center gap-3">
+                  <XCircle className="w-5 h-5" />
+                  {runError}
+                </div>
+              ) : runFeedback ? (
+                <div className="space-y-5 text-sm leading-relaxed text-slate-300">
+                  <div className="border border-blue-900/30 bg-blue-900/10 p-4">
+                    <div className="text-[10px] uppercase tracking-widest text-blue-500/50 mb-2">
+                      Summary · Confidence: {runFeedback.confidence}
+                    </div>
+                    <div>{runFeedback.summary}</div>
+                  </div>
+
+                  {!runFeedback.correct && runFeedback.issues.length > 0 && (
+                    <div>
+                      <div className="text-[10px] uppercase tracking-widest text-blue-500/50 mb-2">
+                        What’s currently wrong / missing
+                      </div>
+                      <ul className="list-disc list-inside space-y-1">
+                        {runFeedback.issues.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {!runFeedback.correct && runFeedback.hints.length > 0 && (
+                    <div>
+                      <div className="text-[10px] uppercase tracking-widest text-blue-500/50 mb-2">
+                        Hints (no solutions)
+                      </div>
+                      <ul className="list-disc list-inside space-y-1">
+                        {runFeedback.hints.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="text-[10px] uppercase tracking-widest text-blue-500/40">
+                    Tip: close this popup (Esc, click outside, or the X) and keep iterating.
+                  </div>
+                </div>
+              ) : (
+                <div className="text-slate-400 text-sm flex items-center gap-3">
+                  <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+                  Loading…
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Help Modal */}
       <AnimatePresence>

@@ -23,6 +23,16 @@ export interface GradingResult {
   solution: string;
 }
 
+export type ProgressConfidence = 'LOW' | 'MEDIUM' | 'HIGH';
+
+export interface ProgressEvaluationResult {
+  correct: boolean;
+  summary: string;
+  issues: string[];
+  hints: string[];
+  confidence: ProgressConfidence;
+}
+
 export interface HistoryItem {
   challenge: Challenge;
   result: GradingResult;

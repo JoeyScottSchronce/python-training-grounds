@@ -1,10 +1,58 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Challenge, GradingResult, Difficulty } from "../types";
+import { Challenge, GradingResult, Difficulty, ProgressEvaluationResult } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY || "" });
 
 function cleanJsonResponse(text: string): string {
   return text.replace(/```json\n?/, "").replace(/\n?```/, "").trim();
+}
+
+function looksLikeCodeOrSolution(text: string): boolean {
+  // Block fenced code and common full-solution patterns.
+  if (/```/m.test(text)) return true;
+  if (/^\s*(def|class)\s+\w+/m.test(text)) return true;
+  if (/^\s*for\s+\w+\s+in\s+/m.test(text)) return true;
+  if (/^\s*while\s+.+:/m.test(text)) return true;
+  return false;
+}
+
+function sanitizeProgressEvaluation(result: ProgressEvaluationResult): ProgressEvaluationResult {
+  const combined = [
+    result.summary,
+    ...(result.issues ?? []),
+    ...(result.hints ?? []),
+  ].join("\n");
+
+  if (looksLikeCodeOrSolution(combined)) {
+    return {
+      correct: false,
+      summary:
+        "I can’t show code or a full solution here, but I can still help you spot what to improve.",
+      issues: [
+        "Your current attempt is missing one or more key pieces required by the prompt (or has a logical mismatch).",
+      ],
+      hints: [
+        "Re-read the challenge and verify your output/return value matches exactly.",
+        "Check edge cases mentioned or implied by the context (empty input, off-by-one, types).",
+        "Make sure you’re using the topic’s intended concept (as hinted by the challenge).",
+      ],
+      confidence: "LOW",
+    };
+  }
+
+  if (result.correct) {
+    return {
+      ...result,
+      summary:
+        result.summary?.trim().length > 0
+          ? result.summary
+          : "Your answer looks correct. Go ahead and submit it.",
+      issues: [],
+      hints: [],
+    };
+  }
+
+  return result;
 }
 
 type AvoidChallenge = Pick<Challenge, "description" | "context">;
@@ -99,5 +147,75 @@ export async function gradeSubmission(challenge: Challenge, submission: string):
     return JSON.parse(cleanedText) as GradingResult;
   } catch (e) {
     throw new Error("Failed to parse AI response for grading.");
+  }
+}
+
+export async function evaluateProgress(
+  challenge: Challenge,
+  submission: string,
+  options?: { compactWhenCorrect?: boolean }
+): Promise<ProgressEvaluationResult> {
+  const compactWhenCorrect = options?.compactWhenCorrect ?? true;
+  const response = await ai.models.generateContent({
+    model: "gemini-3.1-flash-lite-preview",
+    contents: `
+Challenge Description: ${challenge.description}
+Context: ${challenge.context}
+User Submission:
+\`\`\`python
+${submission}
+\`\`\`
+
+Evaluate the user's progress toward a correct solution.
+You MUST NOT provide a full solution, full code, or step-by-step instructions.
+You MUST NOT provide any code blocks.
+Only point out what is incorrect/missing and provide concept-level hints (functions/ideas to consider).
+If the user's submission is fully correct, set correct=true. In that case:
+- summary should say it's correct and suggest the user submit
+- issues MUST be an empty array
+- hints MUST be an empty array
+`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          correct: { type: Type.BOOLEAN },
+          summary: {
+            type: Type.STRING,
+            description:
+              "1–3 sentences describing current progress and the most important gap (no code).",
+          },
+          issues: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description:
+              "Concrete problems with the current attempt (no code; no full solution).",
+          },
+          hints: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description:
+              "Concept-level hints: what to think about or which Python concepts to consider (no code).",
+          },
+          confidence: { type: Type.STRING, enum: ["LOW", "MEDIUM", "HIGH"] },
+        },
+        required: ["correct", "summary", "issues", "hints", "confidence"],
+      },
+      systemInstruction:
+        "You are an expert Python tutor. You only evaluate progress and provide hints. Never reveal a complete solution, never write full code, and never give step-by-step solving instructions. Be brief, specific, and safe.",
+    },
+  });
+
+  try {
+    const cleanedText = cleanJsonResponse(response.text || "{}");
+    const parsed = JSON.parse(cleanedText) as ProgressEvaluationResult;
+    const sanitized = sanitizeProgressEvaluation(parsed);
+    if (compactWhenCorrect && sanitized.correct) {
+      return { ...sanitized, issues: [], hints: [] };
+    }
+    return sanitized;
+  } catch (e) {
+    throw new Error("Failed to parse AI response for progress evaluation.");
   }
 }
