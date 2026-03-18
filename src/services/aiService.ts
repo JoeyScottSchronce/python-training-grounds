@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Challenge, GradingResult, Difficulty } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY || "" });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 function cleanJsonResponse(text: string): string {
   return text.replace(/```json\n?/, "").replace(/\n?```/, "").trim();
