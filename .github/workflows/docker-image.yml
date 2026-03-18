@@ -42,7 +42,7 @@ jobs:
         VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
 
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag bashmaster-ai:$(date +%s)
+      run: docker build . --file Dockerfile --tag python-training-grounds:$(date +%s)
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
