@@ -15,6 +15,8 @@ export interface Challenge {
   description: string;
   context: string;
   expectedCommandHint: string;
+  expectedOutcomeCriteria: string;
+  expectedReferenceSolution: string;
 }
 
 export interface GradingResult {

@@ -83,7 +83,9 @@ Difficulty Level: ${difficulty}.
 Requirements:
 - The challenge should be a specific task the user needs to complete by writing a Python snippet.
 - The target topic (${topicId}) MUST be the primary focus/learning objective of the task.
-- Provide a description of the task and a sample input/output context if applicable.${avoidBlock}`,
+- Provide a description of the task and a sample input/output context if applicable.
+- Include expectedOutcomeCriteria: concise behavioral success criteria (no code).
+- Include expectedReferenceSolution: a canonical Python reference solution that satisfies the task.${avoidBlock}`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -92,9 +94,24 @@ Requirements:
           description: { type: Type.STRING, description: "Clear description of what the user needs to do." },
           context: { type: Type.STRING, description: "Sample input or environment context (e.g. 'You have a list named data with...') " },
           expectedCommandHint: { type: Type.STRING, description: "A small generic hint about the syntax or functions to use without providing the full answer." },
+          expectedOutcomeCriteria: {
+            type: Type.STRING,
+            description: "Behavioral success criteria for a correct solution (no code).",
+          },
+          expectedReferenceSolution: {
+            type: Type.STRING,
+            description: "Canonical Python reference solution for evaluator use.",
+          },
           difficulty: { type: Type.STRING, enum: ["BEGINNER", "INTERMEDIATE", "ADVANCED"] }
         },
-        required: ["description", "context", "expectedCommandHint", "difficulty"]
+        required: [
+          "description",
+          "context",
+          "expectedCommandHint",
+          "expectedOutcomeCriteria",
+          "expectedReferenceSolution",
+          "difficulty",
+        ]
       },
       systemInstruction: "You are an expert Python programming tutor. You generate concise, educational coding challenges for specific Python topics. Focus on practical, real-world scenarios and Pythonic practices."
     }
@@ -161,15 +178,23 @@ export async function evaluateProgress(
     contents: `
 Challenge Description: ${challenge.description}
 Context: ${challenge.context}
+Expected Outcome Criteria: ${challenge.expectedOutcomeCriteria}
+Reference Solution (for evaluator context only):
+\`\`\`python
+${challenge.expectedReferenceSolution}
+\`\`\`
 User Submission:
 \`\`\`python
 ${submission}
 \`\`\`
 
 Evaluate the user's progress toward a correct solution.
+Use the expected criteria and reference solution only as evaluation anchors.
+Mark correct=true if the user's code is functionally equivalent, even if implementation differs.
 You MUST NOT provide a full solution, full code, or step-by-step instructions.
 You MUST NOT provide any code blocks.
 Only point out what is incorrect/missing and provide concept-level hints (functions/ideas to consider).
+All issues and hints must stay within this challenge's scope and map to mismatches with the challenge requirements/expected criteria.
 If the user's submission is fully correct, set correct=true. In that case:
 - summary should say it's correct and suggest the user submit
 - issues MUST be an empty array
