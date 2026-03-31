@@ -29,6 +29,8 @@ import { PYTHON_TOPICS, TOPIC_CATEGORIES, APP_THEME } from './constants';
 import { AppState, Challenge, GradingResult, SessionState, Difficulty, ProgressEvaluationResult } from './types';
 import { evaluateProgress, generateChallenge, gradeSubmission } from './services/aiService';
 import { makeTopicDifficultyKey, fingerprintChallenge } from './utils/challengeFingerprint';
+import { PythonCodeEditor } from './components/PythonCodeEditor';
+import type * as MonacoNS from 'monaco-editor';
 
 const MAX_GENERATION_RETRIES = 3;
 const MAX_RECENT_CHALLENGES_TO_AVOID = 5;
@@ -56,8 +58,9 @@ export default function App() {
   const [runFeedback, setRunFeedback] = useState<ProgressEvaluationResult | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
   const [isRunFeedbackOpen, setIsRunFeedbackOpen] = useState(false);
+  const [showWhitespace, setShowWhitespace] = useState(true);
 
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<MonacoNS.editor.IStandaloneCodeEditor | null>(null);
 
   const filteredTopics = PYTHON_TOPICS.filter(topic => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -73,10 +76,11 @@ export default function App() {
   });
 
   useEffect(() => {
-    if (appState === 'PRACTICE' && inputRef.current) {
-      inputRef.current.focus();
+    if (appState === 'PRACTICE' && editorRef.current) {
+      const id = requestAnimationFrame(() => editorRef.current?.focus());
+      return () => cancelAnimationFrame(id);
     }
-  }, [appState]);
+  }, [appState, session.currentChallenge?.description]);
 
   const pickRandomTopicId = () => {
     if (PYTHON_TOPICS.length === 0) return null;
@@ -577,32 +581,38 @@ export default function App() {
 
               {/* Code Editor */}
               <div className="flex-1 flex flex-col border border-blue-900/30 bg-[#050507] rounded-sm overflow-hidden shadow-2xl">
-                <div className="bg-blue-900/10 px-4 py-2 border-b border-blue-900/30 flex justify-between items-center">
+                <div className="bg-blue-900/10 px-4 py-2 border-b border-blue-900/30 flex justify-between items-center gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500/50" />
                     <div className="w-3 h-3 rounded-full bg-amber-500/50" />
                     <div className="w-3 h-3 rounded-full bg-blue-500/50" />
                     <span className="ml-2 text-[10px] text-blue-500/40 tracking-widest uppercase">main.py</span>
                   </div>
-                  <div className="text-[10px] text-blue-500/40 uppercase tracking-widest">Python 3.x</div>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={showWhitespace}
+                        onChange={(e) => setShowWhitespace(e.target.checked)}
+                        className="rounded border-blue-900/50 bg-black/40 text-blue-500 focus:ring-blue-500/40"
+                      />
+                      <span className="text-[10px] text-blue-500/40 uppercase tracking-widest">Whitespace</span>
+                    </label>
+                    <span className="text-[10px] text-blue-500/40 uppercase tracking-widest">Python 3.x</span>
+                  </div>
                 </div>
                 
-                <div className="p-6 flex-1 flex flex-col font-mono text-lg relative">
-                  <div className="relative h-full">
-                    <textarea
-                      ref={inputRef}
+                <div className="pt-6 pb-6 px-2 sm:px-3 flex-1 flex flex-col font-mono text-lg relative min-h-0">
+                  <div className="relative flex-1 min-h-[280px]">
+                    <PythonCodeEditor
                       value={userInput}
-                      onChange={(e) => setUserInput(e.target.value)}
-                      disabled={appState === 'GRADING'}
-                      rows={10}
-                      className={`w-full bg-transparent border-none outline-none text-blue-100 caret-blue-400 resize-none leading-7 ${appState === 'GRADING' ? 'opacity-0' : 'opacity-100'}`}
-                      autoFocus
-                      spellCheck={false}
-                      autoComplete="off"
-                      placeholder="# Write your Python code here..."
+                      onChange={setUserInput}
+                      readOnly={appState === 'GRADING'}
+                      showWhitespace={showWhitespace}
+                      editorRef={editorRef}
                     />
                     {appState === 'GRADING' && (
-                      <div className="absolute inset-0 bg-[#050507] flex items-center justify-center gap-3">
+                      <div className="absolute inset-0 bg-[#050507] flex items-center justify-center gap-3 z-10 pointer-events-none">
                         <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
                         <span className="text-lg animate-pulse text-blue-400 font-bold uppercase tracking-tighter">Analyzing Syntax...</span>
                       </div>
