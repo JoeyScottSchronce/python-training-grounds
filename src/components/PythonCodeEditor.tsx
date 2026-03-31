@@ -75,7 +75,9 @@ export function PythonCodeEditor({
   }, [editorRef]);
 
   return (
-    <div className={`relative min-h-[280px] h-[min(420px,45vh)] w-full ${className}`}>
+    <div
+      className={`relative w-full min-h-[280px] h-[min(420px,45vh)] lg:h-full lg:min-h-[320px] ${className}`}
+    >
       <Editor
         height="100%"
         width="100%"

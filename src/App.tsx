@@ -358,7 +358,11 @@ export default function App() {
         </div>
       </header>
 
-      <main className="w-full max-w-4xl flex-1 flex flex-col">
+      <main
+        className={`w-full flex-1 flex flex-col min-h-0 ${
+          appState === 'PRACTICE' || appState === 'GRADING' ? 'max-w-7xl' : 'max-w-4xl'
+        }`}
+      >
         <AnimatePresence mode="wait">
           {appState === 'DASHBOARD' && (
             <motion.div 
@@ -541,46 +545,48 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col gap-6 flex-1"
+              className="flex flex-col gap-6 flex-1 min-h-0 w-full lg:flex-row lg:items-stretch lg:gap-6"
             >
               {/* Challenge Card */}
-              <div className="p-6 border border-blue-900/30 bg-blue-900/5 rounded-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2 text-xs text-blue-500/50 uppercase tracking-widest">
-                    <Info className="w-4 h-4" />
-                    <span>
-                      Topic: {session.trainerMode ? (
-                        <span className="text-amber-300/80">Trainer's Choice</span>
-                      ) : (
-                        session.selectedTopic
-                      )}
-                    </span>
+              <div className="lg:flex-[0_0_38%] lg:max-w-xl lg:min-w-0 flex flex-col min-h-0">
+                <div className="p-6 border border-blue-900/30 bg-blue-900/5 rounded-sm lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 text-xs text-blue-500/50 uppercase tracking-widest">
+                      <Info className="w-4 h-4" />
+                      <span>
+                        Topic: {session.trainerMode ? (
+                          <span className="text-amber-300/80">Trainer's Choice</span>
+                        ) : (
+                          session.selectedTopic
+                        )}
+                      </span>
+                    </div>
+                    <div className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest border ${
+                      session.currentChallenge.difficulty === 'BEGINNER' ? 'border-blue-500/50 text-blue-400' :
+                      session.currentChallenge.difficulty === 'INTERMEDIATE' ? 'border-amber-500/50 text-amber-500' :
+                      'border-red-500/50 text-red-500'
+                    }`}>
+                      {session.currentChallenge.difficulty}
+                    </div>
                   </div>
-                  <div className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest border ${
-                    session.currentChallenge.difficulty === 'BEGINNER' ? 'border-blue-500/50 text-blue-400' :
-                    session.currentChallenge.difficulty === 'INTERMEDIATE' ? 'border-amber-500/50 text-amber-500' :
-                    'border-red-500/50 text-red-500'
-                  }`}>
-                    {session.currentChallenge.difficulty}
+                  <h3 className="text-xl font-bold mb-4 text-white leading-tight">
+                    {session.currentChallenge.description}
+                  </h3>
+                  <div className="bg-black/40 p-4 border-l-2 border-blue-500/50 mb-4">
+                    <p className="text-sm italic text-slate-400">
+                      {session.currentChallenge.context}
+                    </p>
                   </div>
+                  {selectedDifficulty === 'BEGINNER' && (
+                    <div className="text-xs text-blue-500/40">
+                      Hint: {session.currentChallenge.expectedCommandHint}
+                    </div>
+                  )}
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-white leading-tight">
-                  {session.currentChallenge.description}
-                </h3>
-                <div className="bg-black/40 p-4 border-l-2 border-blue-500/50 mb-4">
-                  <p className="text-sm italic text-slate-400">
-                    {session.currentChallenge.context}
-                  </p>
-                </div>
-                {selectedDifficulty === 'BEGINNER' && (
-                  <div className="text-xs text-blue-500/40">
-                    Hint: {session.currentChallenge.expectedCommandHint}
-                  </div>
-                )}
               </div>
 
               {/* Code Editor */}
-              <div className="flex-1 flex flex-col border border-blue-900/30 bg-[#050507] rounded-sm overflow-hidden shadow-2xl">
+              <div className="flex-1 flex flex-col min-w-0 min-h-0 border border-blue-900/30 bg-[#050507] rounded-sm overflow-hidden shadow-2xl">
                 <div className="bg-blue-900/10 px-4 py-2 border-b border-blue-900/30 flex justify-between items-center gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500/50" />
@@ -603,7 +609,7 @@ export default function App() {
                 </div>
                 
                 <div className="pt-6 pb-6 px-2 sm:px-3 flex-1 flex flex-col font-mono text-lg relative min-h-0">
-                  <div className="relative flex-1 min-h-[280px]">
+                  <div className="relative flex-1 min-h-[280px] lg:min-h-0">
                     <PythonCodeEditor
                       value={userInput}
                       onChange={setUserInput}
